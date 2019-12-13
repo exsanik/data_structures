@@ -33,7 +33,7 @@ public:
 
 	int query(int v, int tLeft, int tRight, int l, int r) {
 		if (l > r) {
-			return 0;
+			return 0; //neutral element
 		}
 		if (l == tLeft && r == tRight) {
 			return tree[v];
