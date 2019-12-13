@@ -1,11 +1,3 @@
-#include <iostream>
-#include <vector>
-#include <algorithm>
-
-using std::vector;
-using std::cin;
-using std::cout;
-
 class SegmentTree {
 private:
 	vector<int> arr;
@@ -39,8 +31,8 @@ public:
 			return tree[v];
 		}
 		int tMiddle = (tLeft + tRight) / 2;
-		return op(query(v * 2, tLeft, tMiddle, l, std::min(r, tMiddle)),
-			query(v * 2 + 1, tMiddle + 1, tRight, std::max(l, tMiddle + 1), r));
+		return op(query(v * 2, tLeft, tMiddle, l, min(r, tMiddle)),
+			query(v * 2 + 1, tMiddle + 1, tRight, max(l, tMiddle + 1), r));
 	}
 
 	void update(int v, int tLeft, int tRight, int pos, int newVal) {
