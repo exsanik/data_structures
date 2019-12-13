@@ -27,7 +27,7 @@ public:
 			int tMiddle = (tLeft + tRight) / 2;
 			build(v * 2, tLeft, tMiddle);
 			build(v * 2 + 1, tMiddle + 1, tRight);
-			tree[v] = tree[v * 2] + tree[v * 2 + 1];
+			tree[v] = op(tree[v * 2], tree[v * 2 + 1]);
 		}
 	}
 
@@ -53,7 +53,7 @@ public:
 			} else {
 				update(v * 2 + 1, tMiddle + 1, tRight, pos, newVal);
 			}
-			tree[v] = tree[v * 2] + tree[v * 2 + 1];
+			tree[v] = op(tree[v * 2], tree[v * 2 + 1]);
 		}
 	}
 };
