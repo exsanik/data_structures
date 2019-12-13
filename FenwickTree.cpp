@@ -36,7 +36,7 @@ public:
 	int query(int x, int y) {
 		return query(y) - query(x - 1); //1D
 
-		//query(x2, y2) - query(x2, y1 - 1) - query(x1 - 1, y2) + sum(x1 - 1, y1 - 1) //2D
+		//query(x2, y2) - query(x2, y1 - 1) - query(x1 - 1, y2) + query(x1 - 1, y1 - 1) //2D
 		
 		//int value1 = query(x2, y2, z2) - query(x1 - 1, y2, z2) - //3D
 		//    query(x2, y1 - 1, z2) + query(x1 - 1, y1 - 1, z2);
