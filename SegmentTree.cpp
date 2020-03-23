@@ -77,7 +77,7 @@ class SegmentTree {
 
 int main() {
 	vector<int> a = { 99, 100, 1, 2, 1, 10 };
-	SegmentTree tree(a.size(), 0,
+	SegmentTree<int64_t> tree(a.size(), 0,
                     [](int64_t a, int64_t b) { return a + b; }););
 	tree.setArray(&a);
 	tree.build(1, 0, a.size() - 1);
