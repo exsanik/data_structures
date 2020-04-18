@@ -37,7 +37,7 @@ class SegmentTree {
                     queryResult);
                 currentLeftBorder++;
             }
-            if (currentRightBorder & 1) {
+            if (currentRightBorder % 2) {
                 currentRightBorder--;
                 queryResult = std::min(
                     segmentTreeContainer[depthLevel][currentRightBorder],
