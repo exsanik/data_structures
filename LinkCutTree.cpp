@@ -89,8 +89,7 @@ class LinkCutTree {
   void cut(int u, int v) {
     make_root(u);
     access(&tree[v]);
-    tree[v].left->parent = nullptr;  // not works with gnu 14 and gnu 17 O_o,
-                                     // don't know why, other comilers are ok
+    tree[v].left->parent = nullptr;  // doesn't work with gnu 17 O_o
     tree[v].left = nullptr;
   }
 
