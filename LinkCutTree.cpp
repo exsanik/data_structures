@@ -36,38 +36,38 @@ class LinkCutTree {
 
   std::vector<Node> nodes;
 
-  void connect(Node *ch, Node *p, int isLeftChild) {
-    if (ch != nullptr) ch->parent = p;
+  void connect(Node *child, Node *parent, int isLeftChild) {
+    if (child != nullptr) child->parent = parent;
     if (isLeftChild != -1) {
       if (isLeftChild) {
-        p->left = ch;
+        parent->left = child;
       } else {
-        p->right = ch;
+        parent->right = child;
       }
     }
   }
 
   void rotate(Node *x) {
-    Node *p = x->parent;
-    Node *g = p->parent;
-    bool isRootP = p->isRoot();
-    bool leftChildX = (x == p->left);
+    Node *parent = x->parent;
+    Node *gparent = parent->parent;
+    bool isRootP = parent->isRoot();
+    bool leftChildX = (x == parent->left);
 
-    connect(leftChildX ? x->right : x->left, p, leftChildX);
-    connect(p, x, !leftChildX);
-    connect(x, g, isRootP ? -1 : p == g->left);
-    p->update();
+    connect(leftChildX ? x->right : x->left, parent, leftChildX);
+    connect(parent, x, !leftChildX);
+    connect(x, gparent, isRootP ? -1 : parent == gparent->left);
+    parent->update();
   }
 
   void splay(Node *x) {
     while (!x->isRoot()) {
-      Node *p = x->parent;
-      Node *g = p->parent;
-      if (!p->isRoot()) g->push();
-      p->push();
+      Node *parent = x->parent;
+      Node *gparent = parent->parent;
+      if (!parent->isRoot()) gparent->push();
+      parent->push();
       x->push();
-      if (!p->isRoot()) {
-        rotate((x == p->left) == (p == g->left) ? p : x);
+      if (!parent->isRoot()) {
+        rotate((x == parent->left) == (parent == gparent->left) ? parent : x);
       }
       rotate(x);
     }
@@ -77,10 +77,10 @@ class LinkCutTree {
 
   Node *expose(Node *x) {
     Node *last = nullptr;
-    for (Node *y = x; y != nullptr; y = y->parent) {
-      splay(y);
-      y->left = last;
-      last = y;
+    for (Node *curr = x; curr != nullptr; curr = curr->parent) {
+      splay(curr);
+      curr->left = last;
+      last = curr;
     }
     splay(x);
     return last;
