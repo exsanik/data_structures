@@ -1,9 +1,11 @@
-#include <iostream>
 #include <vector>
+#include <algorithm>
 
 class LinkCutTree {
   class Node {
    public:
+    int nodeValue;
+    int subTreeValue;
     int size;
     bool revert;
     Node *left;
@@ -12,6 +14,7 @@ class LinkCutTree {
 
     Node() {
       size = 1;
+      nodeValue = subTreeValue = 0;
       revert = false;
       left = right = parent = nullptr;
     }
@@ -31,7 +34,16 @@ class LinkCutTree {
     }
 
     int getSize(Node *root) { return root == nullptr ? 0 : root->size; }
-    void update() { size = 1 + getSize(left) + getSize(right); }
+
+    int getSubTreeValue(Node *root) {
+      return root == nullptr ? 0 : root->subTreeValue;
+    }
+
+    void update() {
+      subTreeValue = std::max(std::max(nodeValue, getSubTreeValue(left)),
+                              getSubTreeValue(right));
+      size = 1 + getSize(left) + getSize(right);
+    }
   };
 
   std::vector<Node> nodes;
@@ -92,6 +104,18 @@ class LinkCutTree {
   void makeRoot(int x) {
     expose(&nodes[x]);
     nodes[x].revert = !nodes[x].revert;
+  }
+
+  void modify(int x, int delta) {
+    makeRoot(x);
+    nodes[x].nodeValue += delta;
+    nodes[x].update();
+  }
+
+  int getQueryValue(int x, int y) {
+    makeRoot(x);
+    expose(&nodes[y]);
+    return nodes[y].subTreeValue;
   }
 
   bool connected(int x, int y) {
