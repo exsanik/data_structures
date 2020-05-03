@@ -1,107 +1,128 @@
+#include <iostream>
+#include <vector>
+
 class LinkCutTree {
- private:
   class Node {
    public:
-    Node *left, *right, *parent;
-    Node() : left(nullptr), right(nullptr), parent(nullptr) {}
-    bool reverse = false;
-    bool isRoot() const {
-      return !parent || parent->left != this && parent->right != this;
+    int size;
+    bool revert;
+    Node *left;
+    Node *right;
+    Node *parent;
+
+    Node() {
+      size = 1;
+      revert = false;
+      left = right = parent = nullptr;
     }
-    bool isLeft() const {
-      return this != nullptr && parent && parent->left == this;
+
+    bool isRoot() {
+      return parent == nullptr ||
+             (parent->left != this && parent->right != this);
     }
+
     void push() {
-      if (this != nullptr && reverse) {
-        swap(left, right);
-        if (left) left->reverse ^= true;
-        if (right) right->reverse ^= true;
-        reverse = false;
+      if (revert) {
+        revert = false;
+        std::swap(left, right);
+        if (left != nullptr) left->revert = !left->revert;
+        if (right != nullptr) right->revert = !right->revert;
       }
     }
+
+    int getSize(Node *root) { return root == nullptr ? 0 : root->size; }
+    void update() { size = 1 + getSize(left) + getSize(right); }
   };
 
-  Node* tree = nullptr;
+  std::vector<Node> nodes;
 
-  void connect(Node* ver, Node* parent, bool isLeft) {
-    if (ver) ver->parent = parent;
-    (isLeft ? parent->left : parent->right) = ver;
-  }
-
-  void rotate(Node* ver) {
-    Node* parent = ver->parent;
-    Node* gparent = parent->parent;
-    Node* left = ver->left;
-    Node* right = ver->right;
-    bool verleft = ver->isLeft();
-    bool pleft = parent->isLeft();
-    bool proot = parent->isRoot();
-    connect(verleft ? right : left, parent, verleft);
-    connect(parent, ver, !verleft);
-    if (proot) {
-      ver->parent = gparent;
-    } else {
-      connect(ver, gparent, pleft);
-    }
-  }
-
-  void splay(Node* ver) {
-    while (!ver->isRoot()) {
-      Node* parent = ver->parent;
-      Node* gparent = parent->parent;
-      gparent->push();
-      parent->push();
-      ver->push();
-      if (!parent->isRoot()) {
-        rotate(ver->isLeft() ^ parent->isLeft() ? ver : parent);
+  void connect(Node *ch, Node *p, int isLeftChild) {
+    if (ch != nullptr) ch->parent = p;
+    if (isLeftChild != -1) {
+      if (isLeftChild) {
+        p->left = ch;
+      } else {
+        p->right = ch;
       }
-      rotate(ver);
     }
-    ver->push();
   }
 
-  Node* access(Node* ver) {
-    Node* last = 0;
-    for (Node* currVer = ver; currVer; currVer = currVer->parent) {
-      splay(currVer);
-      currVer->right = last;
-      last = currVer;
+  void rotate(Node *x) {
+    Node *p = x->parent;
+    Node *g = p->parent;
+    bool isRootP = p->isRoot();
+    bool leftChildX = (x == p->left);
+
+    connect(leftChildX ? x->right : x->left, p, leftChildX);
+    connect(p, x, !leftChildX);
+    connect(x, g, isRootP ? -1 : p == g->left);
+    p->update();
+  }
+
+  void splay(Node *x) {
+    while (!x->isRoot()) {
+      Node *p = x->parent;
+      Node *g = p->parent;
+      if (!p->isRoot()) g->push();
+      p->push();
+      x->push();
+      if (!p->isRoot()) {
+        rotate((x == p->left) == (p == g->left) ? p : x);
+      }
+      rotate(x);
     }
-    splay(ver);
+    x->push();
+    x->update();
+  }
+
+  Node *expose(Node *x) {
+    Node *last = nullptr;
+    for (Node *y = x; y != nullptr; y = y->parent) {
+      splay(y);
+      y->left = last;
+      last = y;
+    }
+    splay(x);
     return last;
   }
 
  public:
-  explicit LinkCutTree(int size) { tree = new Node[size]; }
-  ~LinkCutTree() { delete[] tree; }
+  explicit LinkCutTree(int size) { nodes.resize(size); }
 
-  void make_root(int v) {
-    access(&tree[v]);
-    tree[v].reverse ^= 1;
+  void makeRoot(int x) {
+    expose(&nodes[x]);
+    nodes[x].revert = !nodes[x].revert;
   }
 
-  void link(int u, int v) {
-    make_root(u);
-    access(&tree[v]);
-    tree[u].parent = &tree[v];
+  bool connected(int x, int y) {
+    if (x == y) return true;
+    expose(&nodes[x]);
+    expose(&nodes[y]);
+    return nodes[x].parent != nullptr;
   }
 
-  void cut(int u, int v) {
-    make_root(u);
-    access(&tree[v]);
-    tree[v].left->parent = nullptr;  // doesn't work with gnu 17 O_o
-    tree[v].left = nullptr;
+  void link(int x, int y) {
+    makeRoot(x);
+    nodes[x].parent = &nodes[y];
   }
 
-  bool connected(int u, int v) {
-    if (u == v) return true;
-    access(&tree[u]);
-    access(&tree[v]);
-    return tree[u].parent != nullptr;
+  void cut(int x, int y) {
+    makeRoot(x);
+    expose(&nodes[y]);
+    nodes[y].right->parent = nullptr;
+    nodes[y].right = nullptr;
   }
 
-  Node* lca(int u, int v) {
-    access(&tree[u]);
-    return access(&tree[v]);
+  int getPathLength(int x, int y) {
+    if (x == y) {
+      return 0;
+    }
+    makeRoot(x);
+    expose(&nodes[y]);
+    if (!connected(x, y)) {
+      return -1;
+    } else {
+      return nodes[x].size;
+    }
   }
 };
